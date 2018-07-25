@@ -10,22 +10,16 @@ import (
 )
 
 type MtcnnDetector struct {
-	modelFile string
-	graph     *tf.Graph
-	session   *tf.Session
+	graph   *tf.Graph
+	session *tf.Session
 
 	minSize         float64
 	scaleFactor     float64
 	scoreThresholds []float32
 }
 
-func NewMtcnnDetector(modelFile string) (*MtcnnDetector, error) {
-	det := &MtcnnDetector{modelFile: modelFile, minSize: 20.0, scaleFactor: 0.709, scoreThresholds: []float32{0.6, 0.7, 0.7}}
-	model, err := ioutil.ReadFile(modelFile)
-	if err != nil {
-		return nil, err
-	}
-
+func NewMtcnnDetectorFromBytes(model []byte) (*MtcnnDetector, error) {
+	det := &MtcnnDetector{minSize: 20.0, scaleFactor: 0.709, scoreThresholds: []float32{0.6, 0.7, 0.7}}
 	graph := tf.NewGraph()
 	if err := graph.Import(model, ""); err != nil {
 		return nil, err
@@ -40,6 +34,15 @@ func NewMtcnnDetector(modelFile string) (*MtcnnDetector, error) {
 	det.session = session
 
 	return det, nil
+}
+
+func NewMtcnnDetector(modelFile string) (*MtcnnDetector, error) {
+	model, err := ioutil.ReadFile(modelFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewMtcnnDetectorFromBytes(model)
 }
 
 func (det *MtcnnDetector) Close() {
