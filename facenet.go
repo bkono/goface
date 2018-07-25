@@ -9,18 +9,21 @@ import (
 )
 
 type Facenet struct {
-	modelFile string
-	graph     *tf.Graph
-	session   *tf.Session
+	graph   *tf.Graph
+	session *tf.Session
 }
 
 func NewFacenet(modelFile string) (*Facenet, error) {
-	fn := &Facenet{modelFile: modelFile}
 	model, err := ioutil.ReadFile(modelFile)
 	if err != nil {
 		return nil, err
 	}
 
+	return NewFacenetFromBytes(model)
+}
+
+func NewFacenetFromBytes(model []byte) (*Facenet, error) {
+	fn := &Facenet{}
 	graph := tf.NewGraph()
 	if err := graph.Import(model, ""); err != nil {
 		return nil, err
